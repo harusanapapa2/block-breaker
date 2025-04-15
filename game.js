@@ -22,10 +22,12 @@ let brickPadding = 10;
 let brickOffsetTop = 30;
 let brickOffsetLeft = 30;
 
+let lives = 3; // 🔴 ライフ変数を追加
+
 let bricks = [];
-for(let c = 0; c < brickColumnCount; c++) {
+for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
-  for(let r = 0; r < brickRowCount; r++) {
+  for (let r = 0; r < brickRowCount; r++) {
     bricks[c][r] = { x: 0, y: 0, status: 1 };
   }
 }
@@ -50,11 +52,12 @@ function keyUpHandler(e) {
 
 function drawBall() {
   ctx.beginPath();
-  ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+  ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
   ctx.fillStyle = "#0095DD";
   ctx.fill();
   ctx.closePath();
 }
+
 function drawPaddle() {
   ctx.beginPath();
   ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
@@ -62,9 +65,10 @@ function drawPaddle() {
   ctx.fill();
   ctx.closePath();
 }
+
 function drawBricks() {
-  for(let c = 0; c < brickColumnCount; c++) {
-    for(let r = 0; r < brickRowCount; r++) {
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
       if (bricks[c][r].status === 1) {
         let brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
         let brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
@@ -79,12 +83,19 @@ function drawBricks() {
     }
   }
 }
+
+function drawLives() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#0095DD";
+  ctx.fillText("Lives: " + lives, canvas.width - 80, 20);
+}
+
 function collisionDetection() {
-  for(let c = 0; c < brickColumnCount; c++) {
-    for(let r = 0; r < brickRowCount; r++) {
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
       let b = bricks[c][r];
-      if(b.status === 1) {
-        if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+      if (b.status === 1) {
+        if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
           dy = -dy;
           b.status = 0;
         }
@@ -98,6 +109,7 @@ function draw() {
   drawBricks();
   drawBall();
   drawPaddle();
+  drawLives(); // 🔴 ライフを描画
   collisionDetection();
 
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
@@ -106,10 +118,21 @@ function draw() {
   if (y + dy < ballRadius) {
     dy = -dy;
   } else if (y + dy > canvas.height - ballRadius) {
-    if(x > paddleX && x < paddleX + paddleWidth) {
+    if (x > paddleX && x < paddleX + paddleWidth) {
       dy = -dy;
     } else {
-      document.location.reload(); // リスタート
+      lives--; // 🔴 ミス時にライフを減らす
+      if (!lives) {
+        alert("ゲームオーバー！");
+        document.location.reload(); // ページをリロードして再スタート
+      } else {
+        // ボールとパドルの位置を初期化
+        x = canvas.width / 2;
+        y = canvas.height - 30;
+        dx = 2;
+        dy = -2;
+        paddleX = (canvas.width - paddleWidth) / 2;
+      }
     }
   }
 
