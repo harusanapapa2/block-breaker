@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（ライフ制 + スコア + ステージ制 + スマホ対応）
+// ブロック崩しゲーム（ライフ制 + スコア + ステージ制 + スマホ対応 + 高解像度 + パドル反射角度）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -24,8 +24,8 @@ let bricks = [];
 function resizeCanvas() {
   const width = window.innerWidth;
   const height = window.innerHeight;
-  canvas.width = Math.min(480, width);
-  canvas.height = Math.min(320, height);
+  canvas.width = Math.min(960, width); // 2倍に拡大
+  canvas.height = Math.min(640, height); // 2倍に拡大
   resetPositions();
 }
 
@@ -145,8 +145,17 @@ function draw() {
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
   else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
-    else {
+    if (x > paddleX && x < paddleX + paddleWidth) {
+      // 🔽 パドルに当たったときの反射角度制御
+      let relativeX = x - (paddleX + paddleWidth / 2);
+      let normalized = relativeX / (paddleWidth / 2); // -1.0 ～ +1.0
+      let maxBounceAngle = Math.PI / 3; // 最大60度
+      let bounceAngle = normalized * maxBounceAngle;
+
+      let speed = Math.sqrt(dx * dx + dy * dy);
+      dx = speed * Math.sin(bounceAngle);
+      dy = -speed * Math.cos(bounceAngle);
+    } else {
       lives--;
       if (!lives) {
         alert("ゲームオーバー！");
