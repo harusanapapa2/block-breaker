@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（ミス後に一時停止せず即カウントダウン → 自動再スタート）
+// ブロック崩しゲーム最終版（スマホ対応・UI分離・ミス再開・反射角度・初期ランダム角・長押し防止）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -27,6 +27,10 @@ let countdown = 3;
 let showMessage = "";
 let isGameOver = false;
 
+function isMobile() {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
 function resizeCanvas() {
   const width = window.innerWidth;
   canvas.width = Math.min(960, width);
@@ -42,8 +46,10 @@ function resizeCanvas() {
 function resetPositions() {
   x = canvas.width / 2;
   y = gameHeight - 30;
-  dx = 2;
-  dy = -2;
+  let angle = (Math.random() * Math.PI) / 2 + Math.PI / 4;
+  let speed = 2.8;
+  dx = speed * Math.cos(angle);
+  dy = -speed * Math.sin(angle);
   paddleX = (canvas.width - paddleWidth) / 2;
 }
 
@@ -68,7 +74,7 @@ function keyUpHandler(e) {
 
 function drawMessage() {
   if (showMessage || countdown > 0) {
-    ctx.font = "40px Arial";
+    ctx.font = isMobile() ? "80px Arial" : "40px Arial";
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
     ctx.fillText(showMessage || countdown.toString(), canvas.width / 2, canvas.height / 2);
@@ -237,6 +243,8 @@ leftBtn.style.width = "100px";
 leftBtn.style.height = "100px";
 leftBtn.style.fontSize = "40px";
 leftBtn.style.zIndex = 10;
+leftBtn.style.userSelect = "none";
+leftBtn.style.touchAction = "none";
 document.body.appendChild(leftBtn);
 
 const rightBtn = document.createElement("button");
@@ -246,6 +254,8 @@ rightBtn.style.width = "100px";
 rightBtn.style.height = "100px";
 rightBtn.style.fontSize = "40px";
 rightBtn.style.zIndex = 10;
+rightBtn.style.userSelect = "none";
+rightBtn.style.touchAction = "none";
 document.body.appendChild(rightBtn);
 
 leftBtn.addEventListener("touchstart", () => leftPressed = true);
