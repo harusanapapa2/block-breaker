@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（スマホ制限削除・ボタン削除・ミス後再開修正）
+// ブロック崩しゲーム（ミス後に即リスタート・カウントダウン廃止）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -22,8 +22,7 @@ let stage = 1;
 let gameHeight = 640;
 let totalHeight = 840;
 let bricks = [];
-let isRunning = false;
-let countdown = 3;
+let isRunning = true;
 let showMessage = "";
 let isGameOver = false;
 
@@ -61,16 +60,6 @@ function keyDownHandler(e) {
 function keyUpHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
   else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
-}
-
-function drawMessage() {
-  if (showMessage || countdown > 0) {
-    ctx.font = "40px Arial";
-    ctx.fillStyle = "red";
-    ctx.textAlign = "center";
-    ctx.fillText(showMessage || countdown.toString(), canvas.width / 2, canvas.height / 2);
-    ctx.textAlign = "left";
-  }
 }
 
 function drawBall() {
@@ -146,7 +135,6 @@ function collisionDetection() {
     brickRowCount++;
     createBricks();
     resetPositions();
-    startCountdown();
   }
 }
 
@@ -162,7 +150,6 @@ function draw() {
   drawScore();
   drawLives();
   drawStage();
-  drawMessage();
   collisionDetection();
 
   if (isRunning) {
@@ -179,14 +166,11 @@ function draw() {
         dy = -speed * Math.cos(bounceAngle);
       } else {
         lives--;
-        isRunning = false;
         if (!lives) {
-          showMessage = "ゲームオーバー";
+          isRunning = false;
+          alert("ゲームオーバー");
         } else {
           resetPositions();
-          setTimeout(() => {
-            startCountdown();
-          }, 500);
         }
         return;
       }
@@ -199,27 +183,11 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-function startCountdown() {
-  countdown = 3;
-  const interval = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) {
-      clearInterval(interval);
-      countdown = 0;
-      showMessage = "スタート！";
-      setTimeout(() => {
-        showMessage = "";
-        isRunning = true;
-      }, 500);
-    }
-  }, 1000);
-}
-
 window.addEventListener("resize", resizeCanvas);
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 
 resizeCanvas();
 createBricks();
-startCountdown();
+resetPositions();
 draw();
