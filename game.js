@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（スマホ対応・UI分離・メッセージ・カウントダウン・反射角度調整）
+// ブロック崩しゲーム（ミス後に一時停止せず即カウントダウン → 自動再スタート）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -25,6 +25,7 @@ let bricks = [];
 let isRunning = false;
 let countdown = 3;
 let showMessage = "";
+let isGameOver = false;
 
 function resizeCanvas() {
   const width = window.innerWidth;
@@ -32,7 +33,6 @@ function resizeCanvas() {
   canvas.height = totalHeight;
   resetPositions();
 
-  // スマホボタン位置調整
   leftBtn.style.left = `${Math.max(20, canvas.width * 0.1 - 50)}px`;
   rightBtn.style.right = `${Math.max(20, canvas.width * 0.1 - 50)}px`;
   leftBtn.style.bottom = `${totalHeight - gameHeight + 50}px`;
@@ -182,8 +182,10 @@ function draw() {
         dy = -speed * Math.cos(bounceAngle);
       } else {
         lives--;
+        isRunning = false;
         if (!lives) {
           showMessage = "ゲームオーバー";
+          isGameOver = true;
         } else {
           showMessage = "ミス！";
           setTimeout(() => {
@@ -192,7 +194,6 @@ function draw() {
             startCountdown();
           }, 1000);
         }
-        isRunning = false;
         return;
       }
     }
@@ -215,7 +216,7 @@ function startCountdown() {
       setTimeout(() => {
         showMessage = "";
         isRunning = true;
-      }, 1000);
+      }, 500);
     }
   }, 1000);
 }
