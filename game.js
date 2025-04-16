@@ -1,5 +1,3 @@
-// ブロック崩しゲーム最終版（ミス後リスタート修正済み）
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -46,7 +44,7 @@ function resizeCanvas() {
 function resetPositions() {
   x = canvas.width / 2;
   y = gameHeight - 30;
-  let angle = (Math.random() * Math.PI) / 2 + Math.PI / 4;
+  let angle = (Math.random() * Math.PI) / 2 + Math.PI / 4; // 45〜135度
   let speed = 2.8;
   dx = speed * Math.cos(angle);
   dy = -speed * Math.sin(angle);
@@ -85,7 +83,7 @@ function drawMessage() {
 function drawBall() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-  ctx.fillStyle = "red";
+  ctx.fillStyle = "red"; // 赤いボール
   ctx.fill();
   ctx.closePath();
 }
@@ -188,10 +186,9 @@ function draw() {
         dy = -speed * Math.cos(bounceAngle);
       } else {
         lives--;
+        isRunning = false;
         if (!lives) {
           showMessage = "ゲームオーバー";
-          isGameOver = true;
-          isRunning = false;
         } else {
           showMessage = "ミス！";
           setTimeout(() => {
@@ -203,11 +200,14 @@ function draw() {
         return;
       }
     }
+
     if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
     else if (leftPressed && paddleX > 0) paddleX -= 5;
+
     x += dx;
     y += dy;
   }
+
   requestAnimationFrame(draw);
 }
 
@@ -227,6 +227,7 @@ function startCountdown() {
   }, 1000);
 }
 
+// スマホタッチ
 canvas.addEventListener("touchmove", function (e) {
   const rect = canvas.getBoundingClientRect();
   const touchX = e.touches[0].clientX - rect.left;
@@ -235,3 +236,45 @@ canvas.addEventListener("touchmove", function (e) {
   if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
   e.preventDefault();
 }, { passive: false });
+
+// スマホ用ボタン
+const leftBtn = document.createElement("button");
+leftBtn.textContent = "◀";
+Object.assign(leftBtn.style, {
+  position: "absolute",
+  width: "100px",
+  height: "100px",
+  fontSize: "40px",
+  zIndex: 10,
+  userSelect: "none",
+  touchAction: "none"
+});
+document.body.appendChild(leftBtn);
+
+const rightBtn = document.createElement("button");
+rightBtn.textContent = "▶";
+Object.assign(rightBtn.style, {
+  position: "absolute",
+  width: "100px",
+  height: "100px",
+  fontSize: "40px",
+  zIndex: 10,
+  userSelect: "none",
+  touchAction: "none"
+});
+document.body.appendChild(rightBtn);
+
+leftBtn.addEventListener("touchstart", () => leftPressed = true);
+leftBtn.addEventListener("touchend", () => leftPressed = false);
+rightBtn.addEventListener("touchstart", () => rightPressed = true);
+rightBtn.addEventListener("touchend", () => rightPressed = false);
+
+window.addEventListener("resize", resizeCanvas);
+document.addEventListener("keydown", keyDownHandler);
+document.addEventListener("keyup", keyUpHandler);
+
+// 起動
+resizeCanvas();
+createBricks();
+startCountdown();
+draw();
