@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（ミス後に即リスタート・カウントダウン廃止）
+// ブロック崩しゲーム（スマホ操作対応・画面サイズ調整・ミス時リスタート修正）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -27,9 +27,11 @@ let showMessage = "";
 let isGameOver = false;
 
 function resizeCanvas() {
-  const width = window.innerWidth;
-  canvas.width = Math.min(960, width);
-  canvas.height = totalHeight;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  canvas.width = Math.min(window.innerWidth, 960);
+  canvas.height = isPortrait ? window.innerHeight - 20 : totalHeight;
+  gameHeight = canvas.height * 0.75;
+  totalHeight = canvas.height;
   resetPositions();
 }
 
@@ -41,6 +43,7 @@ function resetPositions() {
   dx = speed * Math.cos(angle);
   dy = -speed * Math.sin(angle);
   paddleX = (canvas.width - paddleWidth) / 2;
+  isRunning = true; // ← ミス時も再スタートできるように
 }
 
 function createBricks() {
@@ -182,6 +185,15 @@ function draw() {
   }
   requestAnimationFrame(draw);
 }
+
+canvas.addEventListener("touchmove", function (e) {
+  const rect = canvas.getBoundingClientRect();
+  const touchX = e.touches[0].clientX - rect.left;
+  paddleX = touchX - paddleWidth / 2;
+  if (paddleX < 0) paddleX = 0;
+  if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
+  e.preventDefault();
+}, { passive: false });
 
 window.addEventListener("resize", resizeCanvas);
 document.addEventListener("keydown", keyDownHandler);
