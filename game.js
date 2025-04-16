@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（10列ブロック & スマホ視認性向上）
+// ブロック崩しゲーム（スマホ用左右ボタン + ブロック配置最終調整）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -10,12 +10,12 @@ let paddleWidth = 75;
 let rightPressed = false;
 let leftPressed = false;
 let brickRowCount = 5;
-let brickColumnCount = 10; // 🔷 10列に増加
-let brickWidth = 72;       // 🔷 幅を調整（960pxでちょうど10列）
+let brickColumnCount = 10; // 10列
+let brickWidth = 80;       // 幅 80px
 let brickHeight = 25;
-let brickPadding = 8;      // 🔷 パディングを調整
+let brickPadding = 10;     // 間隔 10px
 let brickOffsetTop = 40;
-let brickOffsetLeft = 20;  // 🔷 左端を狭めて中央寄せ
+let brickOffsetLeft = 35;  // 左右マージン 35px
 let lives = 3;
 let score = 0;
 let stage = 1;
@@ -91,19 +91,19 @@ function drawBricks() {
 }
 
 function drawScore() {
-  ctx.font = "20px Arial"; // 🔷 スマホでも見やすく
+  ctx.font = "20px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.fillText("Score: " + score, 10, 30);
 }
 
 function drawLives() {
-  ctx.font = "20px Arial"; // 🔷 スマホでも見やすく
+  ctx.font = "20px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.fillText("Lives: " + lives, canvas.width - 110, 30);
 }
 
 function drawStage() {
-  ctx.font = "20px Arial"; // 🔷 スマホでも見やすく
+  ctx.font = "20px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.fillText("Stage: " + stage, canvas.width / 2 - 40, 30);
 }
@@ -180,6 +180,32 @@ canvas.addEventListener("touchmove", function (e) {
   if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
   e.preventDefault();
 }, { passive: false });
+
+// 🔽 スマホUIボタン追加
+const leftBtn = document.createElement("button");
+leftBtn.textContent = "◀";
+leftBtn.style.position = "absolute";
+leftBtn.style.bottom = "20px";
+leftBtn.style.left = "20px";
+leftBtn.style.width = "60px";
+leftBtn.style.height = "60px";
+leftBtn.style.fontSize = "30px";
+document.body.appendChild(leftBtn);
+
+const rightBtn = document.createElement("button");
+rightBtn.textContent = "▶";
+rightBtn.style.position = "absolute";
+rightBtn.style.bottom = "20px";
+rightBtn.style.right = "20px";
+rightBtn.style.width = "60px";
+rightBtn.style.height = "60px";
+rightBtn.style.fontSize = "30px";
+document.body.appendChild(rightBtn);
+
+leftBtn.addEventListener("touchstart", () => leftPressed = true);
+leftBtn.addEventListener("touchend", () => leftPressed = false);
+rightBtn.addEventListener("touchstart", () => rightPressed = true);
+rightBtn.addEventListener("touchend", () => rightPressed = false);
 
 window.addEventListener("resize", resizeCanvas);
 document.addEventListener("keydown", keyDownHandler);
