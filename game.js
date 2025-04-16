@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（スマホ用左右ボタン + ブロック配置最終調整）
+// ブロック崩しゲーム（ゲーム画面高さ840px + 下部200px色分け + UIエリア分離）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -10,28 +10,29 @@ let paddleWidth = 75;
 let rightPressed = false;
 let leftPressed = false;
 let brickRowCount = 5;
-let brickColumnCount = 10; // 10列
-let brickWidth = 80;       // 幅 80px
+let brickColumnCount = 10;
+let brickWidth = 80;
 let brickHeight = 25;
-let brickPadding = 10;     // 間隔 10px
+let brickPadding = 10;
 let brickOffsetTop = 40;
-let brickOffsetLeft = 35;  // 左右マージン 35px
+let brickOffsetLeft = 35;
 let lives = 3;
 let score = 0;
 let stage = 1;
+let gameHeight = 640; // 🔷 ゲーム判定範囲
+let totalHeight = 840; // 🔷 全体のキャンバスサイズ（+200px UIエリア）
 let bricks = [];
 
 function resizeCanvas() {
   const width = window.innerWidth;
-  const height = window.innerHeight;
   canvas.width = Math.min(960, width);
-  canvas.height = Math.min(640, height);
+  canvas.height = totalHeight;
   resetPositions();
 }
 
 function resetPositions() {
   x = canvas.width / 2;
-  y = canvas.height - 30;
+  y = gameHeight - 30;
   dx = 2;
   dy = -2;
   paddleX = (canvas.width - paddleWidth) / 2;
@@ -66,7 +67,7 @@ function drawBall() {
 
 function drawPaddle() {
   ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+  ctx.rect(paddleX, gameHeight - paddleHeight, paddleWidth, paddleHeight);
   ctx.fillStyle = "#0095DD";
   ctx.fill();
   ctx.closePath();
@@ -133,7 +134,12 @@ function collisionDetection() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // 背景：ゲームエリア（上）とUIエリア（下）
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, gameHeight);
+  ctx.fillStyle = "#dddddd";
+  ctx.fillRect(0, gameHeight, canvas.width, totalHeight - gameHeight);
+
   drawBricks();
   drawBall();
   drawPaddle();
@@ -144,7 +150,7 @@ function draw() {
 
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
   if (y + dy < ballRadius) dy = -dy;
-  else if (y + dy > canvas.height - ballRadius) {
+  else if (y + dy > gameHeight - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
       let relativeX = x - (paddleX + paddleWidth / 2);
       let normalized = relativeX / (paddleWidth / 2);
@@ -181,25 +187,27 @@ canvas.addEventListener("touchmove", function (e) {
   e.preventDefault();
 }, { passive: false });
 
-// 🔽 スマホUIボタン追加
+// 🔽 UIボタンをゲーム画面下部（UIエリア）に配置
 const leftBtn = document.createElement("button");
 leftBtn.textContent = "◀";
 leftBtn.style.position = "absolute";
-leftBtn.style.bottom = "20px";
-leftBtn.style.left = "20px";
-leftBtn.style.width = "60px";
-leftBtn.style.height = "60px";
-leftBtn.style.fontSize = "30px";
+leftBtn.style.bottom = "50px";
+leftBtn.style.left = "50px";
+leftBtn.style.width = "100px";
+leftBtn.style.height = "100px";
+leftBtn.style.fontSize = "40px";
+leftBtn.style.zIndex = 10;
 document.body.appendChild(leftBtn);
 
 const rightBtn = document.createElement("button");
 rightBtn.textContent = "▶";
 rightBtn.style.position = "absolute";
-rightBtn.style.bottom = "20px";
-rightBtn.style.right = "20px";
-rightBtn.style.width = "60px";
-rightBtn.style.height = "60px";
-rightBtn.style.fontSize = "30px";
+rightBtn.style.bottom = "50px";
+rightBtn.style.right = "50px";
+rightBtn.style.width = "100px";
+rightBtn.style.height = "100px";
+rightBtn.style.fontSize = "40px";
+rightBtn.style.zIndex = 10;
 document.body.appendChild(rightBtn);
 
 leftBtn.addEventListener("touchstart", () => leftPressed = true);
