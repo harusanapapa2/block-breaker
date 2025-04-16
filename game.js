@@ -1,3 +1,5 @@
+// ブロック崩しゲーム（ミス後に即カウントダウン＆再スタート / 完全コード）
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -44,7 +46,7 @@ function resizeCanvas() {
 function resetPositions() {
   x = canvas.width / 2;
   y = gameHeight - 30;
-  let angle = (Math.random() * Math.PI) / 2 + Math.PI / 4; // 45〜135度
+  let angle = (Math.random() * Math.PI) / 2 + Math.PI / 4;
   let speed = 2.8;
   dx = speed * Math.cos(angle);
   dy = -speed * Math.sin(angle);
@@ -83,7 +85,7 @@ function drawMessage() {
 function drawBall() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-  ctx.fillStyle = "red"; // 赤いボール
+  ctx.fillStyle = "red";
   ctx.fill();
   ctx.closePath();
 }
@@ -190,24 +192,17 @@ function draw() {
         if (!lives) {
           showMessage = "ゲームオーバー";
         } else {
-          showMessage = "ミス！";
-          setTimeout(() => {
-            showMessage = "";
-            resetPositions();
-            startCountdown();
-          }, 1000);
+          resetPositions();
+          startCountdown(); // ← 「ミス！」表示せずカウントダウンへ直行
         }
         return;
       }
     }
-
     if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
     else if (leftPressed && paddleX > 0) paddleX -= 5;
-
     x += dx;
     y += dy;
   }
-
   requestAnimationFrame(draw);
 }
 
@@ -227,7 +222,6 @@ function startCountdown() {
   }, 1000);
 }
 
-// スマホタッチ
 canvas.addEventListener("touchmove", function (e) {
   const rect = canvas.getBoundingClientRect();
   const touchX = e.touches[0].clientX - rect.left;
@@ -237,7 +231,6 @@ canvas.addEventListener("touchmove", function (e) {
   e.preventDefault();
 }, { passive: false });
 
-// スマホ用ボタン
 const leftBtn = document.createElement("button");
 leftBtn.textContent = "◀";
 Object.assign(leftBtn.style, {
@@ -273,7 +266,6 @@ window.addEventListener("resize", resizeCanvas);
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 
-// 起動
 resizeCanvas();
 createBricks();
 startCountdown();

@@ -2,13 +2,37 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ブロック崩し</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ブロック崩しゲーム</title>
   <style>
-    canvas { background: #eee; display: block; margin: 0 auto; }
+    body {
+      margin: 0;
+      background-color: #f0f0f0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    #gameCanvas {
+      display: block;
+      background-color: #ffffff;
+      margin: 0 auto;
+      touch-action: none;
+    }
+    button {
+      border: none;
+      border-radius: 10px;
+      background-color: #0095DD;
+      color: white;
+      font-weight: bold;
+    }
+    button:active {
+      background-color: #0077bb;
+    }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="480" height="320"></canvas>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- JavaScript本体 -->
   <script src="game.js"></script>
 </body>
 </html>
