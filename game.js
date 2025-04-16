@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（ゲーム画面高さ840px + 下部200px色分け + UIエリア分離）
+// ブロック崩しゲーム（スマホ対応・UI分離・メッセージ・カウントダウン・反射角度調整）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -19,15 +19,24 @@ let brickOffsetLeft = 35;
 let lives = 3;
 let score = 0;
 let stage = 1;
-let gameHeight = 640; // 🔷 ゲーム判定範囲
-let totalHeight = 840; // 🔷 全体のキャンバスサイズ（+200px UIエリア）
+let gameHeight = 640;
+let totalHeight = 840;
 let bricks = [];
+let isRunning = false;
+let countdown = 3;
+let showMessage = "";
 
 function resizeCanvas() {
   const width = window.innerWidth;
   canvas.width = Math.min(960, width);
   canvas.height = totalHeight;
   resetPositions();
+
+  // スマホボタン位置調整
+  leftBtn.style.left = `${Math.max(20, canvas.width * 0.1 - 50)}px`;
+  rightBtn.style.right = `${Math.max(20, canvas.width * 0.1 - 50)}px`;
+  leftBtn.style.bottom = `${totalHeight - gameHeight + 50}px`;
+  rightBtn.style.bottom = `${totalHeight - gameHeight + 50}px`;
 }
 
 function resetPositions() {
@@ -55,6 +64,16 @@ function keyDownHandler(e) {
 function keyUpHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
   else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+}
+
+function drawMessage() {
+  if (showMessage || countdown > 0) {
+    ctx.font = "40px Arial";
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+    ctx.fillText(showMessage || countdown.toString(), canvas.width / 2, canvas.height / 2);
+    ctx.textAlign = "left";
+  }
 }
 
 function drawBall() {
@@ -130,11 +149,11 @@ function collisionDetection() {
     brickRowCount++;
     createBricks();
     resetPositions();
+    startCountdown();
   }
 }
 
 function draw() {
-  // 背景：ゲームエリア（上）とUIエリア（下）
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, gameHeight);
   ctx.fillStyle = "#dddddd";
@@ -146,36 +165,59 @@ function draw() {
   drawScore();
   drawLives();
   drawStage();
+  drawMessage();
   collisionDetection();
 
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
-  if (y + dy < ballRadius) dy = -dy;
-  else if (y + dy > gameHeight - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      let relativeX = x - (paddleX + paddleWidth / 2);
-      let normalized = relativeX / (paddleWidth / 2);
-      let maxBounceAngle = Math.PI / 3;
-      let bounceAngle = normalized * maxBounceAngle;
-      let speed = Math.sqrt(dx * dx + dy * dy);
-      dx = speed * Math.sin(bounceAngle);
-      dy = -speed * Math.cos(bounceAngle);
-    } else {
-      lives--;
-      if (!lives) {
-        alert("ゲームオーバー！");
-        document.location.reload();
+  if (isRunning) {
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+    if (y + dy < ballRadius) dy = -dy;
+    else if (y + dy > gameHeight - ballRadius) {
+      if (x > paddleX && x < paddleX + paddleWidth) {
+        let relativeX = x - (paddleX + paddleWidth / 2);
+        let normalized = relativeX / (paddleWidth / 2);
+        let maxBounceAngle = Math.PI / 3;
+        let bounceAngle = normalized * maxBounceAngle;
+        let speed = Math.sqrt(dx * dx + dy * dy);
+        dx = speed * Math.sin(bounceAngle);
+        dy = -speed * Math.cos(bounceAngle);
       } else {
-        resetPositions();
+        lives--;
+        if (!lives) {
+          showMessage = "ゲームオーバー";
+        } else {
+          showMessage = "ミス！";
+          setTimeout(() => {
+            showMessage = "";
+            resetPositions();
+            startCountdown();
+          }, 1000);
+        }
+        isRunning = false;
+        return;
       }
     }
+    if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
+    else if (leftPressed && paddleX > 0) paddleX -= 5;
+    x += dx;
+    y += dy;
   }
-
-  if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
-  else if (leftPressed && paddleX > 0) paddleX -= 5;
-
-  x += dx;
-  y += dy;
   requestAnimationFrame(draw);
+}
+
+function startCountdown() {
+  countdown = 3;
+  const interval = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(interval);
+      countdown = 0;
+      showMessage = "スタート！";
+      setTimeout(() => {
+        showMessage = "";
+        isRunning = true;
+      }, 1000);
+    }
+  }, 1000);
 }
 
 canvas.addEventListener("touchmove", function (e) {
@@ -187,12 +229,9 @@ canvas.addEventListener("touchmove", function (e) {
   e.preventDefault();
 }, { passive: false });
 
-// 🔽 UIボタンをゲーム画面下部（UIエリア）に配置
 const leftBtn = document.createElement("button");
 leftBtn.textContent = "◀";
 leftBtn.style.position = "absolute";
-leftBtn.style.bottom = "50px";
-leftBtn.style.left = "50px";
 leftBtn.style.width = "100px";
 leftBtn.style.height = "100px";
 leftBtn.style.fontSize = "40px";
@@ -202,8 +241,6 @@ document.body.appendChild(leftBtn);
 const rightBtn = document.createElement("button");
 rightBtn.textContent = "▶";
 rightBtn.style.position = "absolute";
-rightBtn.style.bottom = "50px";
-rightBtn.style.right = "50px";
 rightBtn.style.width = "100px";
 rightBtn.style.height = "100px";
 rightBtn.style.fontSize = "40px";
@@ -221,4 +258,5 @@ document.addEventListener("keyup", keyUpHandler);
 
 resizeCanvas();
 createBricks();
+startCountdown();
 draw();
