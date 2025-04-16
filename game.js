@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（高解像度に合わせてブロック数・配置を調整）
+// ブロック崩しゲーム（10列ブロック & スマホ視認性向上）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -9,13 +9,13 @@ let paddleHeight = 10;
 let paddleWidth = 75;
 let rightPressed = false;
 let leftPressed = false;
-let brickRowCount = 5; // ← 行数を増加
-let brickColumnCount = 8; // ← 列数を増加
-let brickWidth = 80;
+let brickRowCount = 5;
+let brickColumnCount = 10; // 🔷 10列に増加
+let brickWidth = 72;       // 🔷 幅を調整（960pxでちょうど10列）
 let brickHeight = 25;
-let brickPadding = 10;
+let brickPadding = 8;      // 🔷 パディングを調整
 let brickOffsetTop = 40;
-let brickOffsetLeft = 35;
+let brickOffsetLeft = 20;  // 🔷 左端を狭めて中央寄せ
 let lives = 3;
 let score = 0;
 let stage = 1;
@@ -91,21 +91,21 @@ function drawBricks() {
 }
 
 function drawScore() {
-  ctx.font = "16px Arial";
+  ctx.font = "20px Arial"; // 🔷 スマホでも見やすく
   ctx.fillStyle = "#0095DD";
-  ctx.fillText("Score: " + score, 8, 20);
+  ctx.fillText("Score: " + score, 10, 30);
 }
 
 function drawLives() {
-  ctx.font = "16px Arial";
+  ctx.font = "20px Arial"; // 🔷 スマホでも見やすく
   ctx.fillStyle = "#0095DD";
-  ctx.fillText("Lives: " + lives, canvas.width - 80, 20);
+  ctx.fillText("Lives: " + lives, canvas.width - 110, 30);
 }
 
 function drawStage() {
-  ctx.font = "16px Arial";
+  ctx.font = "20px Arial"; // 🔷 スマホでも見やすく
   ctx.fillStyle = "#0095DD";
-  ctx.fillText("Stage: " + stage, canvas.width / 2 - 30, 20);
+  ctx.fillText("Stage: " + stage, canvas.width / 2 - 40, 30);
 }
 
 function collisionDetection() {
