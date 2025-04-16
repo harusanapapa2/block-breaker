@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（ライフ制 + スコア + ステージ制 + スマホ対応 + 高解像度 + パドル反射角度）
+// ブロック崩しゲーム（高解像度に合わせてブロック数・配置を調整）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -9,13 +9,13 @@ let paddleHeight = 10;
 let paddleWidth = 75;
 let rightPressed = false;
 let leftPressed = false;
-let brickRowCount = 3;
-let brickColumnCount = 5;
-let brickWidth = 75;
-let brickHeight = 20;
+let brickRowCount = 5; // ← 行数を増加
+let brickColumnCount = 8; // ← 列数を増加
+let brickWidth = 80;
+let brickHeight = 25;
 let brickPadding = 10;
-let brickOffsetTop = 30;
-let brickOffsetLeft = 30;
+let brickOffsetTop = 40;
+let brickOffsetLeft = 35;
 let lives = 3;
 let score = 0;
 let stage = 1;
@@ -24,8 +24,8 @@ let bricks = [];
 function resizeCanvas() {
   const width = window.innerWidth;
   const height = window.innerHeight;
-  canvas.width = Math.min(960, width); // 2倍に拡大
-  canvas.height = Math.min(640, height); // 2倍に拡大
+  canvas.width = Math.min(960, width);
+  canvas.height = Math.min(640, height);
   resetPositions();
 }
 
@@ -146,12 +146,10 @@ function draw() {
   if (y + dy < ballRadius) dy = -dy;
   else if (y + dy > canvas.height - ballRadius) {
     if (x > paddleX && x < paddleX + paddleWidth) {
-      // 🔽 パドルに当たったときの反射角度制御
       let relativeX = x - (paddleX + paddleWidth / 2);
-      let normalized = relativeX / (paddleWidth / 2); // -1.0 ～ +1.0
-      let maxBounceAngle = Math.PI / 3; // 最大60度
+      let normalized = relativeX / (paddleWidth / 2);
+      let maxBounceAngle = Math.PI / 3;
       let bounceAngle = normalized * maxBounceAngle;
-
       let speed = Math.sqrt(dx * dx + dy * dy);
       dx = speed * Math.sin(bounceAngle);
       dy = -speed * Math.cos(bounceAngle);
