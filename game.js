@@ -1,4 +1,4 @@
-// ブロック崩しゲーム（ミス後に即カウントダウン＆再スタート / 完全コード）
+// ブロック崩しゲーム（スマホ制限削除・ボタン削除・ミス後再開修正）
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -27,20 +27,11 @@ let countdown = 3;
 let showMessage = "";
 let isGameOver = false;
 
-function isMobile() {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-}
-
 function resizeCanvas() {
   const width = window.innerWidth;
   canvas.width = Math.min(960, width);
   canvas.height = totalHeight;
   resetPositions();
-
-  leftBtn.style.left = `${Math.max(20, canvas.width * 0.1 - 50)}px`;
-  rightBtn.style.right = `${Math.max(20, canvas.width * 0.1 - 50)}px`;
-  leftBtn.style.bottom = `${totalHeight - gameHeight + 50}px`;
-  rightBtn.style.bottom = `${totalHeight - gameHeight + 50}px`;
 }
 
 function resetPositions() {
@@ -74,7 +65,7 @@ function keyUpHandler(e) {
 
 function drawMessage() {
   if (showMessage || countdown > 0) {
-    ctx.font = isMobile() ? "80px Arial" : "40px Arial";
+    ctx.font = "40px Arial";
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
     ctx.fillText(showMessage || countdown.toString(), canvas.width / 2, canvas.height / 2);
@@ -193,7 +184,9 @@ function draw() {
           showMessage = "ゲームオーバー";
         } else {
           resetPositions();
-          startCountdown(); // ← 「ミス！」表示せずカウントダウンへ直行
+          setTimeout(() => {
+            startCountdown();
+          }, 500);
         }
         return;
       }
@@ -221,46 +214,6 @@ function startCountdown() {
     }
   }, 1000);
 }
-
-canvas.addEventListener("touchmove", function (e) {
-  const rect = canvas.getBoundingClientRect();
-  const touchX = e.touches[0].clientX - rect.left;
-  paddleX = touchX - paddleWidth / 2;
-  if (paddleX < 0) paddleX = 0;
-  if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
-  e.preventDefault();
-}, { passive: false });
-
-const leftBtn = document.createElement("button");
-leftBtn.textContent = "◀";
-Object.assign(leftBtn.style, {
-  position: "absolute",
-  width: "100px",
-  height: "100px",
-  fontSize: "40px",
-  zIndex: 10,
-  userSelect: "none",
-  touchAction: "none"
-});
-document.body.appendChild(leftBtn);
-
-const rightBtn = document.createElement("button");
-rightBtn.textContent = "▶";
-Object.assign(rightBtn.style, {
-  position: "absolute",
-  width: "100px",
-  height: "100px",
-  fontSize: "40px",
-  zIndex: 10,
-  userSelect: "none",
-  touchAction: "none"
-});
-document.body.appendChild(rightBtn);
-
-leftBtn.addEventListener("touchstart", () => leftPressed = true);
-leftBtn.addEventListener("touchend", () => leftPressed = false);
-rightBtn.addEventListener("touchstart", () => rightPressed = true);
-rightBtn.addEventListener("touchend", () => rightPressed = false);
 
 window.addEventListener("resize", resizeCanvas);
 document.addEventListener("keydown", keyDownHandler);
